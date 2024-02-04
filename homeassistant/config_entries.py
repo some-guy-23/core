@@ -378,9 +378,9 @@ class ConfigEntry:
         self._async_cancel_retry_setup: Callable[[], Any] | None = None
 
         # Hold list for actions to call on unload.
-        self._on_unload: list[Callable[[], Coroutine[Any, Any, None] | None]] | None = (
-            None
-        )
+        self._on_unload: list[
+            Callable[[], Coroutine[Any, Any, None] | None]
+        ] | None = None
 
         # Reload lock to prevent conflicting reloads
         self.reload_lock = asyncio.Lock()
@@ -916,7 +916,7 @@ class ConfigEntry:
             # Reconfigure flow already in progress for this entry
             return
         hass.async_create_task(
-            self._async_init_reauth(hass, context, data),
+            self._async_init_reconfigure(hass, context, data),
             f"config entry reconfigure {self.title} {self.domain} {self.entry_id}",
         )
 
@@ -2392,9 +2392,11 @@ async def support_remove_from_device(hass: HomeAssistant, domain: str) -> bool:
 
 
 async def support_entry_reconfigure(hass: HomeAssistant, domain: str) -> bool:
-    """Test if a domain supports entry unloading."""
-    if loader.is_component_module_loaded(hass, f"{domain}.config_flow") and (
-        HANDLERS.get(domain)
+    """Test if a domain supports reconfigure flow."""
+    if (
+        loader.is_component_module_loaded(hass, f"{domain}.config_flow")
+        and (handler := HANDLERS.get(domain))
+        and hasattr(handler, "async_step_reconfigure")
     ):
         return True
     return False
