@@ -17,7 +17,12 @@ from homeassistant.core import CoreState, HomeAssistant, callback
 from homeassistant.exceptions import MaxLengthExceeded
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
-from tests.common import MockConfigEntry, async_fire_time_changed, flush_store
+from tests.common import (
+    MockConfigEntry,
+    async_fire_time_changed,
+    flush_store,
+    mock_platform,
+)
 
 YAML__OPEN_PATH = "homeassistant.util.yaml.loader.open"
 
@@ -1267,6 +1272,8 @@ async def test_disable_config_entry_disables_entities(
     entity_registry: er.EntityRegistry,
 ) -> None:
     """Test that we disable entities tied to a config entry."""
+    mock_platform(hass, "light.config_flow", None)
+    config_entries.HANDLERS["light"] = config_entries.ConfigFlow
     config_entry = MockConfigEntry(domain="light")
     config_entry.add_to_hass(hass)
 
