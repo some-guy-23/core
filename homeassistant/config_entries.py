@@ -40,7 +40,13 @@ from .exceptions import (
     ConfigEntryNotReady,
     HomeAssistantError,
 )
-from .helpers import device_registry, entity_registry, issue_registry as ir, storage
+from .helpers import (
+    device_registry,
+    entity_registry,
+    issue_registry as ir,
+    storage,
+    translation,
+)
 from .helpers.debounce import Debouncer
 from .helpers.dispatcher import async_dispatcher_send
 from .helpers.event import (
@@ -250,6 +256,7 @@ class ConfigEntry:
         "_tries",
         "_setup_again_job",
         "_supports_options",
+        "translations",
     )
 
     def __init__(
@@ -359,6 +366,8 @@ class ConfigEntry:
         self._tries = 0
         self._setup_again_job: HassJob | None = None
 
+        self.translations: dict[str, str] = {}
+
     def __repr__(self) -> str:
         """Representation of ConfigEntry."""
         return (
@@ -416,6 +425,7 @@ class ConfigEntry:
             return
 
         if domain_is_integration:
+            await self._async_load_translations(hass)
             try:
                 integration.get_platform("config_flow")
             except ImportError as err:
@@ -880,6 +890,21 @@ class ConfigEntry:
         self._background_tasks.add(task)
         task.add_done_callback(self._background_tasks.remove)
         return task
+
+    async def _async_load_translations(self, hass: HomeAssistant) -> None:
+        """Load translations."""
+        config_language = hass.config.language
+        try:
+            self.translations = await translation.async_get_translations(
+                hass, config_language, "device", {self.domain}
+            )
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Could not load translations for %s",
+                self.domain,
+                exc_info=err,
+            )
+            self.translations = {}
 
 
 current_entry: ContextVar[ConfigEntry | None] = ContextVar(
