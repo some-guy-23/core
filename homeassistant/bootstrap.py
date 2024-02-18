@@ -29,6 +29,7 @@ from .const import (
 from .exceptions import HomeAssistantError
 from .helpers import (
     area_registry,
+    category_registry,
     config_validation as cv,
     device_registry,
     entity,
@@ -301,6 +302,7 @@ async def async_load_base_functionality(hass: core.HomeAssistant) -> None:
     template.async_setup(hass)
     await asyncio.gather(
         area_registry.async_load(hass),
+        category_registry.async_load(hass),
         device_registry.async_load(hass),
         entity_registry.async_load(hass),
         floor_registry.async_load(hass),

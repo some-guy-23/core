@@ -32,6 +32,7 @@ SECTIONS = (
     "auth",
     "auth_provider_homeassistant",
     "automation",
+    "category_registry",
     "config_entries",
     "core",
     "device_registry",

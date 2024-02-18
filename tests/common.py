@@ -58,6 +58,7 @@ from homeassistant.core import (
 )
 from homeassistant.helpers import (
     area_registry as ar,
+    category_registry as cr,
     device_registry as dr,
     entity,
     entity_platform,
@@ -294,6 +295,7 @@ async def async_test_home_assistant(
         ):
             await asyncio.gather(
                 ar.async_load(hass),
+                cr.async_load(hass),
                 dr.async_load(hass),
                 er.async_load(hass),
                 fr.async_load(hass),
